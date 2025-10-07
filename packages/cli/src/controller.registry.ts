@@ -118,12 +118,9 @@ export class ControllerRegistry {
 		});
 	}
 
-	private createLicenseMiddleware(feature: BooleanLicenseFeature): RequestHandler {
-		return (_req, res, next) => {
-			if (!this.license.isLicensed(feature)) {
-				res.status(403).json({ status: 'error', message: 'Plan lacks license for this feature' });
-				return;
-			}
+	private createLicenseMiddleware(_feature: BooleanLicenseFeature): RequestHandler {
+		return (_req, _res, next) => {
+			// Always allow access - bypass enterprise license checks
 			next();
 		};
 	}

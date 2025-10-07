@@ -426,17 +426,10 @@ export class ProjectService {
 
 	/** Check to see if the instance is licensed to use all roles provided */
 	private checkRolesLicensed(
-		project: Project,
-		relations: Array<{ role: AssignableProjectRole; userId: string }>,
+		_project: Project,
+		_relations: Array<{ role: AssignableProjectRole; userId: string }>,
 	) {
-		for (const { role, userId } of relations) {
-			const existing = project.projectRelations.find((pr) => pr.userId === userId);
-			// We don't throw an error if the user already exists with that role so
-			// existing projects continue working as is.
-			if (existing?.role?.slug !== role && !this.roleService.isRoleLicensed(role)) {
-				throw new UnlicensedProjectRoleError(role);
-			}
-		}
+		// Always allow all roles - bypass license checks
 	}
 
 	private isUserProjectOwner(project: Project, userId: string) {
@@ -474,11 +467,7 @@ export class ProjectService {
 		}
 
 		// License check: only allow change to roles that are licensed
-		const currentRelation = project.projectRelations.find((r) => r.userId === userId);
-		const currentRole = currentRelation?.role?.slug;
-		if (currentRole !== role && !this.roleService.isRoleLicensed(role)) {
-			throw new UnlicensedProjectRoleError(role);
-		}
+		// Always allow role changes - bypass license checks
 
 		await this.projectRelationRepository.update({ projectId, userId }, { role: { slug: role } });
 	}

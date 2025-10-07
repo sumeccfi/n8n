@@ -15,8 +15,6 @@ import { PublicApiKeyService } from '@/services/public-api-key.service';
 import type { PaginatedRequest } from '../../../types';
 import { decodeCursor } from '../services/pagination.service';
 
-const UNLIMITED_USERS_QUOTA = -1;
-
 export type ProjectScopeResource = 'workflow' | 'credential';
 
 const buildScopeMiddleware = (
@@ -86,45 +84,30 @@ export const validCursor = (
 };
 
 const emptyMiddleware = (_req: Request, _res: Response, next: NextFunction) => next();
-export const apiKeyHasScope = (apiKeyScope: ApiKeyScope) => {
-	return Container.get(License).isApiKeyScopesEnabled()
-		? Container.get(PublicApiKeyService).getApiKeyScopeMiddleware(apiKeyScope)
-		: emptyMiddleware;
+export const apiKeyHasScope = (_apiKeyScope: ApiKeyScope) => {
+	// Always return empty middleware - bypass API key scope checks
+	return emptyMiddleware;
 };
 
 export const apiKeyHasScopeWithGlobalScopeFallback = (
-	config: { scope: ApiKeyScope & Scope } | { apiKeyScope: ApiKeyScope; globalScope: Scope },
+	_config: { scope: ApiKeyScope & Scope } | { apiKeyScope: ApiKeyScope; globalScope: Scope },
 ) => {
-	if ('scope' in config) {
-		return Container.get(License).isApiKeyScopesEnabled()
-			? Container.get(PublicApiKeyService).getApiKeyScopeMiddleware(config.scope)
-			: globalScope(config.scope);
-	} else {
-		return Container.get(License).isApiKeyScopesEnabled()
-			? Container.get(PublicApiKeyService).getApiKeyScopeMiddleware(config.apiKeyScope)
-			: globalScope(config.globalScope);
-	}
+	// Always return empty middleware - bypass API key scope checks
+	return emptyMiddleware;
 };
 
 export const validLicenseWithUserQuota = (
 	_: express.Request,
-	res: express.Response,
+	_res: express.Response,
 	next: express.NextFunction,
 ): express.Response | void => {
-	const license = Container.get(License);
-	if (license.getUsersLimit() !== UNLIMITED_USERS_QUOTA) {
-		return res.status(403).json({
-			message: '/users path can only be used with a valid license. See https://n8n.io/pricing/',
-		});
-	}
-
+	// Always allow access - bypass user quota checks
 	return next();
 };
 
-export const isLicensed = (feature: BooleanLicenseFeature) => {
-	return async (_: AuthenticatedRequest, res: express.Response, next: express.NextFunction) => {
-		if (Container.get(License).isLicensed(feature)) return next();
-
-		return res.status(403).json({ message: new FeatureNotLicensedError(feature).message });
+export const isLicensed = (_feature: BooleanLicenseFeature) => {
+	return async (_: AuthenticatedRequest, _res: express.Response, next: express.NextFunction) => {
+		// Always allow access - bypass license feature checks
+		return next();
 	};
 };

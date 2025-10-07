@@ -57,14 +57,10 @@ export class LicenseService {
 		};
 	}
 
-	async requestEnterpriseTrial(user: User) {
-		await axios.post('https://enterprise.n8n.io/enterprise-trial', {
-			licenseType: 'enterprise',
-			firstName: user.firstName,
-			lastName: user.lastName,
-			email: user.email,
-			instanceUrl: this.urlService.getWebhookBaseUrl(),
-		});
+	async requestEnterpriseTrial(_user: User) {
+		// Block external network call - return immediately without making HTTP request
+		this.logger.info('Enterprise trial request blocked - operating in offline mode');
+		return;
 	}
 
 	async registerCommunityEdition({
@@ -80,30 +76,20 @@ export class LicenseService {
 		instanceUrl: string;
 		licenseType: string;
 	}): Promise<{ title: string; text: string }> {
-		try {
-			const {
-				data: { licenseKey, ...rest },
-			} = await axios.post<{ title: string; text: string; licenseKey: string }>(
-				'https://enterprise.n8n.io/community-registered',
-				{
-					email,
-					instanceId,
-					instanceUrl,
-					licenseType,
-				},
-			);
-			this.eventService.emit('license-community-plus-registered', { userId, email, licenseKey });
-			return rest;
-		} catch (e: unknown) {
-			if (e instanceof AxiosError) {
-				const error = e as AxiosError<{ message: string }>;
-				const errorMsg = error.response?.data?.message ?? e.message;
-				throw new BadRequestError('Failed to register community edition: ' + errorMsg);
-			} else {
-				this.logger.error('Failed to register community edition', { error: ensureError(e) });
-				throw new BadRequestError('Failed to register community edition');
-			}
-		}
+		// Block external network call - return mock response
+		this.logger.info('Community edition registration blocked - operating in offline mode');
+
+		const mockLicenseKey = `local-license-${instanceId}`;
+		this.eventService.emit('license-community-plus-registered', {
+			userId,
+			email,
+			licenseKey: mockLicenseKey,
+		});
+
+		return {
+			title: 'Registration Complete (Offline)',
+			text: 'Community edition registration completed in offline mode.',
+		};
 	}
 
 	getManagementJwt(): string {

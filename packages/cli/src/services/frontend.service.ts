@@ -87,7 +87,7 @@ export class FrontendService {
 		const restEndpoint = this.globalConfig.endpoints.rest;
 
 		const telemetrySettings: ITelemetrySettings = {
-			enabled: this.globalConfig.diagnostics.enabled,
+			enabled: false, // Force disable telemetry to block external calls
 		};
 
 		if (telemetrySettings.enabled) {
@@ -144,24 +144,23 @@ export class FrontendService {
 				oauth2: `${instanceBaseUrl}/${restEndpoint}/oauth2-credential/callback`,
 			},
 			versionNotifications: {
-				enabled: this.globalConfig.versionNotifications.enabled,
-				endpoint: this.globalConfig.versionNotifications.endpoint,
-				whatsNewEnabled: this.globalConfig.versionNotifications.whatsNewEnabled,
-				whatsNewEndpoint: this.globalConfig.versionNotifications.whatsNewEndpoint,
-				infoUrl: this.globalConfig.versionNotifications.infoUrl,
+				enabled: false, // Disable version notifications to block external calls
+				endpoint: '',
+				whatsNewEnabled: false,
+				whatsNewEndpoint: '',
+				infoUrl: '',
 			},
 			instanceId: this.instanceSettings.instanceId,
 			telemetry: telemetrySettings,
 			posthog: {
-				enabled: this.globalConfig.diagnostics.enabled,
-				apiHost: this.globalConfig.diagnostics.posthogConfig.apiHost,
-				apiKey: this.globalConfig.diagnostics.posthogConfig.apiKey,
+				enabled: false, // Force disable posthog analytics to block external calls
+				apiHost: '',
+				apiKey: '',
 				autocapture: false,
-				disableSessionRecording: this.globalConfig.deployment.type !== 'cloud',
-				debug: this.globalConfig.logging.level === 'debug',
+				disableSessionRecording: true,
+				debug: false,
 			},
-			personalizationSurveyEnabled:
-				this.globalConfig.personalization.enabled && this.globalConfig.diagnostics.enabled,
+			personalizationSurveyEnabled: false, // Disable personalization survey
 			defaultLocale: this.globalConfig.defaultLocale,
 			userManagement: {
 				quota: this.license.getUsersLimit(),
@@ -364,7 +363,7 @@ export class FrontendService {
 			variables: this.license.isVariablesEnabled(),
 			sourceControl: this.license.isSourceControlLicensed(),
 			externalSecrets: this.license.isExternalSecretsEnabled(),
-			showNonProdBanner: this.license.isLicensed(LICENSE_FEATURES.SHOW_NON_PROD_BANNER),
+			showNonProdBanner: false, // Always hide non-production license banner
 			debugInEditor: this.license.isDebugInEditorLicensed(),
 			binaryDataS3: isS3Available && isS3Selected && isS3Licensed,
 			workflowHistory:

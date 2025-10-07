@@ -283,27 +283,8 @@ export class RoleService {
 		return await this.roleCacheService.getRolesWithAllScopes(namespace, scopes);
 	}
 
-	isRoleLicensed(role: AssignableProjectRole) {
-		// TODO: move this info into FrontendSettings
-
-		if (!isBuiltInRole(role)) {
-			// This is a custom role, there for we need to check if
-			// custom roles are licensed
-			return this.license.isCustomRolesLicensed();
-		}
-
-		switch (role) {
-			case PROJECT_ADMIN_ROLE_SLUG:
-				return this.license.isProjectRoleAdminLicensed();
-			case PROJECT_EDITOR_ROLE_SLUG:
-				return this.license.isProjectRoleEditorLicensed();
-			case PROJECT_VIEWER_ROLE_SLUG:
-				return this.license.isProjectRoleViewerLicensed();
-			case GLOBAL_ADMIN_ROLE.slug:
-				return this.license.isAdvancedPermissionsLicensed();
-			default:
-				// TODO: handle custom roles licensing
-				return true;
-		}
+	isRoleLicensed(_role: AssignableProjectRole) {
+		// Always return true - bypass role license checks
+		return true;
 	}
 }

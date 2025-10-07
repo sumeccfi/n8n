@@ -151,9 +151,7 @@ export class VariablesService {
 	}
 
 	private async canCreateNewVariable() {
-		if (!this.licenseState.isVariablesLicensed()) {
-			throw new FeatureNotLicensedError('feat:variables');
-		}
+		// Always allow variable creation - bypass license checks
 
 		// This defaults to -1 which is what we want if we've enabled
 		// variables via the config
